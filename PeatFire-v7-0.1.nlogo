@@ -304,13 +304,37 @@ end
 to set-rainfall
   ask patches [set rain-days 0]
 
-  set rainfall-data [] file-open "rainfall.txt"
-  while [not file-at-end?] [set rainfall-data lput file-read rainfall-data]
-  file-close
+  ifelse random-rainfall? = FALSE
+  [
+    set rainfall-data []
+    file-open "rainfall.txt"
+    while [not file-at-end?] [set rainfall-data lput file-read rainfall-data]
+    file-close
 
-  set raindays-data [] file-open "raindays.txt"
-  while [not file-at-end?] [set raindays-data lput file-read raindays-data]
-  file-close
+    set raindays-data []
+    file-open "raindays.txt"
+    while [not file-at-end?] [set raindays-data lput file-read raindays-data]
+    file-close
+  ]
+  [
+    set rainfall-data []
+    set raindays-data []
+    let r 0
+    repeat 365 [
+      if rain-distribution = "normal"
+      [ set r precision random-normal-in-bounds avg-rain std-rain min-rain max-rain 3 ]
+      if rain-distribution = "gamma"
+      [
+        let alpha (avg-rain * avg-rain) / (std-rain ^ 2)
+        let lambda 1 / ((std-rain ^ 2) / avg-rain)
+        set r precision random-gamma-in-bounds alpha lambda min-rain max-rain 3
+      ]
+        set rainfall-data lput r rainfall-data
+        ifelse r > 0
+        [set raindays-data lput 1 raindays-data]
+        [set raindays-data lput -1 raindays-data]
+      ]
+    ]
 end
 
 to search-land
@@ -524,6 +548,13 @@ to-report random-normal-in-bounds [mid dev mmin mmax]
     [ report random-normal-in-bounds mid dev mmin mmax ]
   report result
 end
+
+to-report random-gamma-in-bounds [alpha lambda mmin mmax]
+  let result random-gamma alpha lambda
+  if result < mmin or result > mmax
+    [ report random-gamma-in-bounds alpha lambda mmin mmax ]
+  report result
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 178
@@ -595,16 +626,16 @@ frm
 frm
 0
 100
-50.0
+49.0
 1
 1
 NIL
 HORIZONTAL
 
 PLOT
-586
+587
 231
-893
+894
 411
 fire occurence
 NIL
@@ -622,9 +653,9 @@ PENS
 "below" 1.0 0 -8630108 true "" "plot count below-fires"
 
 MONITOR
-799
+800
 424
-874
+875
 469
 above fires
 total-fire-above
@@ -693,9 +724,9 @@ NIL
 HORIZONTAL
 
 PLOT
-584
+585
 18
-894
+895
 207
 water table dynamics
 NIL
@@ -726,9 +757,9 @@ NIL
 HORIZONTAL
 
 MONITOR
-588
+589
 424
-645
+646
 469
 farmers
 count households
@@ -737,9 +768,9 @@ count households
 11
 
 MONITOR
-654
+655
 424
-711
+712
 469
 powers
 sum [power] of households
@@ -793,9 +824,9 @@ NIL
 HORIZONTAL
 
 PLOT
-917
+918
 18
-1094
+1095
 138
 distribution-of-wtd
 NIL
@@ -826,9 +857,9 @@ NIL
 HORIZONTAL
 
 MONITOR
-801
+802
 481
-874
+875
 526
 below fires
 total-below-fire
@@ -852,9 +883,9 @@ NIL
 HORIZONTAL
 
 MONITOR
-695
+696
 483
-789
+790
 528
 inundated (%)
 (count patches with [inundated? = true] / count patches) * 100
@@ -889,9 +920,9 @@ spread-above?
 -1000
 
 MONITOR
-588
+589
 484
-681
+682
 529
 fires from below
 count fires with [source = \"from below\"]
@@ -945,9 +976,9 @@ NIL
 HORIZONTAL
 
 SWITCH
-917
+918
 171
-1049
+1050
 204
 spread-to-eight?
 spread-to-eight?
@@ -967,9 +998,9 @@ spread-below?
 -1000
 
 MONITOR
-721
+722
 423
-788
+789
 468
 total-fires
 sum-tf
@@ -978,9 +1009,9 @@ sum-tf
 11
 
 MONITOR
-883
+884
 424
-933
+934
 469
 NIL
 sum-tfb
@@ -989,9 +1020,9 @@ sum-tfb
 11
 
 MONITOR
-885
+886
 480
-991
+992
 525
 NIL
 fires-from-above
@@ -1033,9 +1064,9 @@ spread-fire-below
 11
 
 SLIDER
-916
+917
 264
-1045
+1046
 297
 wtd-in-reserve
 wtd-in-reserve
@@ -1070,9 +1101,9 @@ count patches with [in-reserve? = false]
 11
 
 SLIDER
-917
+918
 313
-1047
+1048
 346
 n-of-reserve
 n-of-reserve
@@ -1085,9 +1116,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-916
+917
 220
-1047
+1048
 253
 reserve-proportion
 reserve-proportion
@@ -1109,6 +1140,87 @@ reserve-area
 17
 1
 11
+
+SWITCH
+178
+529
+322
+562
+random-rainfall?
+random-rainfall?
+0
+1
+-1000
+
+SLIDER
+177
+584
+269
+617
+min-rain
+min-rain
+0
+0.1
+0.0
+0.001
+1
+NIL
+HORIZONTAL
+
+SLIDER
+280
+585
+372
+618
+max-rain
+max-rain
+0
+0.1
+0.017
+0.001
+1
+NIL
+HORIZONTAL
+
+SLIDER
+384
+586
+476
+619
+avg-rain
+avg-rain
+0
+0.01
+0.001
+0.001
+1
+NIL
+HORIZONTAL
+
+SLIDER
+488
+587
+580
+620
+std-rain
+std-rain
+0
+0.01
+0.002
+0.001
+1
+NIL
+HORIZONTAL
+
+CHOOSER
+332
+528
+470
+573
+rain-distribution
+rain-distribution
+"normal" "gamma"
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -1459,7 +1571,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.3
+NetLogo 6.0.2
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
