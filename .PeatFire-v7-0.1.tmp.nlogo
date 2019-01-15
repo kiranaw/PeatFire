@@ -323,7 +323,7 @@ to set-rainfall
     set raindays-data []
     let r 0
 
-    file-open "rainfall-15y.txt"
+    file-open "rainfall-15y.tx"
     let result csv:from-row file-read-line
     while [ not file-at-end? ] [
       let row (csv:from-row file-read-line ";")
@@ -497,7 +497,6 @@ to make-reserve
       set-ind
     ]
   ]
-
 end
 
 to set-wtd

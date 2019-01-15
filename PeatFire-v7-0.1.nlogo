@@ -323,7 +323,7 @@ to set-rainfall
     set raindays-data []
     let r 0
 
-    file-open "rainfall-15y.txt"
+    file-open "rainfall15y.csv"
     let result csv:from-row file-read-line
     while [ not file-at-end? ] [
       let row (csv:from-row file-read-line ";")
@@ -747,7 +747,7 @@ dbi
 dbi
 0
 10
-5.0
+1.0
 1
 1
 NIL
@@ -912,7 +912,7 @@ SWITCH
 465
 spread-above?
 spread-above?
-0
+1
 1
 -1000
 
@@ -990,7 +990,7 @@ SWITCH
 505
 spread-below?
 spread-below?
-0
+1
 1
 -1000
 
@@ -1150,10 +1150,10 @@ random-rainfall?
 -1000
 
 CHOOSER
-340
-535
-478
-580
+331
+530
+469
+575
 rain-distribution
 rain-distribution
 "normal" "gamma"
