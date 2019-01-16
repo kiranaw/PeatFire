@@ -329,16 +329,17 @@ to set-rainfall
       let row (csv:from-row file-read-line ";")
       let avg item 0 row
       let std item 1 row
+      let maks item 2 row
       let alpha 0
       let lambda 0
       if rain-distribution = "normal"
-      [set r precision random-normal-in-bounds avg std 0 0.006 3]
-      if rain-distribution = "gamma" and std > 0
+      [set r precision random-normal-in-bounds avg std 0 maks 3]
+      if rain-distribution = "gamma" and std > 0 and avg > 0
       [
         set lambda 0
         set alpha (avg * avg) / (std ^ 2)
         set lambda 1 / ((std ^ 2) / avg)
-        set r precision random-gamma-in-bounds alpha lambda 0 0.006 3
+        set r precision random-gamma-in-bounds alpha lambda 0 maks 3
       ]
       set rainfall-data lput r rainfall-data
       ifelse r > 0
@@ -1511,7 +1512,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.4
+NetLogo 6.0.2
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
