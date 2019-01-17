@@ -558,10 +558,10 @@ to-report random-gamma-in-bounds [alpha lambda mmin mmax]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-178
-18
-575
-416
+179
+26
+576
+424
 -1
 -1
 3.8515
@@ -634,10 +634,10 @@ NIL
 HORIZONTAL
 
 PLOT
-587
-231
-894
-411
+586
+225
+893
+405
 fire occurence
 NIL
 NIL
@@ -654,10 +654,10 @@ PENS
 "below" 1.0 0 -8630108 true "" "plot count below-fires"
 
 MONITOR
-800
-424
-875
-469
+798
+430
+873
+475
 above fires
 total-fire-above
 3
@@ -726,9 +726,9 @@ HORIZONTAL
 
 PLOT
 585
-18
+28
 895
-207
+217
 water table dynamics
 NIL
 NIL
@@ -758,10 +758,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-589
-424
-646
-469
+587
+430
+644
+475
 farmers
 count households
 17
@@ -769,10 +769,10 @@ count households
 11
 
 MONITOR
-655
-424
-712
-469
+653
+430
+710
+475
 powers
 sum [power] of households
 17
@@ -825,10 +825,10 @@ NIL
 HORIZONTAL
 
 PLOT
-918
-18
-1095
-138
+908
+28
+1133
+196
 distribution-of-wtd
 NIL
 NIL
@@ -858,10 +858,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-802
-481
-875
-526
+800
+487
+873
+532
 below fires
 total-below-fire
 17
@@ -884,10 +884,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-696
-483
-790
-528
+694
+489
+788
+534
 inundated (%)
 (count patches with [inundated? = true] / count patches) * 100
 2
@@ -921,10 +921,10 @@ spread-above?
 -1000
 
 MONITOR
-589
-484
-682
-529
+587
+490
+680
+535
 fires from below
 count fires with [source = \"from below\"]
 4
@@ -977,10 +977,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-918
-171
-1050
-204
+12
+512
+144
+545
 spread-to-eight?
 spread-to-eight?
 1
@@ -999,10 +999,10 @@ spread-below?
 -1000
 
 MONITOR
-722
-423
-789
-468
+720
+429
+787
+474
 total-fires
 sum-tf
 17
@@ -1010,10 +1010,10 @@ sum-tf
 11
 
 MONITOR
-884
-424
-934
-469
+882
+430
+932
+475
 NIL
 sum-tfb
 17
@@ -1021,10 +1021,10 @@ sum-tfb
 11
 
 MONITOR
-886
-480
-992
-525
+884
+486
+990
+531
 NIL
 fires-from-above
 17
@@ -1032,10 +1032,10 @@ fires-from-above
 11
 
 MONITOR
-939
-425
-989
-470
+937
+431
+987
+476
 NIL
 sum-hi
 17
@@ -1043,10 +1043,10 @@ sum-hi
 11
 
 MONITOR
-998
-424
-1100
-469
+996
+430
+1098
+475
 NIL
 spread-fire-above
 17
@@ -1054,10 +1054,10 @@ spread-fire-above
 11
 
 MONITOR
-997
-479
-1099
-524
+995
+485
+1097
+530
 NIL
 spread-fire-below
 17
@@ -1065,10 +1065,10 @@ spread-fire-below
 11
 
 SLIDER
-917
-264
-1046
-297
+11
+605
+140
+638
 wtd-in-reserve
 wtd-in-reserve
 0
@@ -1080,10 +1080,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-1067
-172
-1152
-217
+488
+525
+573
+570
 p-in-reserve
 count patches with [in-reserve? = true]
 17
@@ -1091,10 +1091,10 @@ count patches with [in-reserve? = true]
 11
 
 MONITOR
-1068
-228
-1152
-273
+489
+581
+573
+626
 p-out-reserve
 count patches with [in-reserve? = false]
 17
@@ -1102,10 +1102,10 @@ count patches with [in-reserve? = false]
 11
 
 SLIDER
-918
-313
-1048
-346
+12
+654
+142
+687
 n-of-reserve
 n-of-reserve
 0
@@ -1117,10 +1117,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-917
-220
-1048
-253
+11
+561
+142
+594
 reserve-proportion
 reserve-proportion
 0.1
@@ -1132,10 +1132,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-1070
-289
-1127
-334
+491
+642
+548
+687
 ra
 reserve-area
 17
@@ -1162,6 +1162,24 @@ rain-distribution
 rain-distribution
 "normal" "gamma"
 1
+
+PLOT
+903
+226
+1141
+408
+rainfall dynamics
+NIL
+NIL
+0.0
+10.0
+0.0
+0.1
+true
+true
+"" ""
+PENS
+"rainfall" 1.0 0 -15390905 true "" "if ticks > 0 [plot item (ticks - 1) rainfall-data]"
 
 @#$#@#$#@
 ## WHAT IS IT?
