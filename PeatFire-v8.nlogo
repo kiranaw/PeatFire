@@ -166,7 +166,7 @@ to fire-process
     if any? fires-here and burnt? = FALSE
     [
       set left-biomass left-biomass - bbr
-      if left-biomass >= 0
+      if left-biomass <= 0
       [
         set burnt? TRUE
         set burnt-patches burnt-patches + 1
@@ -553,7 +553,7 @@ frm
 frm
 0
 100
-49.0
+55.0
 1
 1
 NIL
@@ -606,10 +606,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-8
-155
-165
-188
+7
+157
+164
+190
 dst
 dst
 10
@@ -644,7 +644,7 @@ evp
 evp
 0.003
 0.01
-0.0065
+0.0066
 0.0002
 1
 NIL
@@ -829,7 +829,7 @@ ind
 ind
 0
 0.2
-0.1
+0.0
 0.01
 1
 NIL
@@ -866,7 +866,7 @@ wsp
 wsp
 0.1
 1
-0.55
+1.0
 0.1
 1
 NIL
@@ -896,7 +896,7 @@ psb
 psb
 0.1
 1
-0.55
+1.0
 0.1
 1
 NIL
@@ -1422,7 +1422,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.2
+NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
