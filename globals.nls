@@ -17,6 +17,7 @@ globals[
   fires-from-above
   spread-fire-above
   spread-fire-below
+  burnt-patches
   sum-hi
   sum-tf
   sum-tfb
@@ -33,6 +34,7 @@ globals[
   list-sfa
   list-sfb
   list-hi
+  list-burnt-patches
   p-in-rev
   reserve-area
   reserve?

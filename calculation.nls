@@ -1,3 +1,4 @@
+; ini adalah untuk menjumlahkan total api dari tick ke tick sampai habis
 to reset-total-fires
   set sum-hi sum-hi + human-ignited
   set sum-tf sum-tf + total-fire
@@ -7,6 +8,7 @@ to reset-total-fires
   set sum-ffa sum-ffa + fires-from-above
   set sum-sfa sum-sfa + spread-fire-above
   set sum-sfb sum-sfb + spread-fire-below
+  set sum-burnt-patches sum-burnt-patches + burnt-patches
 
   set human-ignited 0
   set total-fire 0
@@ -16,6 +18,7 @@ to reset-total-fires
   set fires-from-above 0
   set spread-fire-above 0
   set spread-fire-below 0
+  set sum-burnt-patches 0
 end
 
 to set-lists
@@ -27,8 +30,10 @@ to set-lists
   set list-ffa []
   set list-sfa []
   set list-sfb []
+  set list-burnt-patches []
 end
 
+;ini adalah untuk menghitung dan menyimpan nilai per tick nya
 to save-fires-ticks
   set list-tf lput total-fire list-tf
   set list-tfa lput total-fire-above list-tfa
@@ -37,23 +42,9 @@ to save-fires-ticks
   set list-ffa lput fires-from-above list-ffa
   set list-sfa lput spread-fire-above list-sfa
   set list-sfb lput spread-fire-below list-sfb
+  set list-burnt-patches lput burnt-patches list-burnt-patches
 end
 
 to count-fires
   set total-fire total-fire-above + total-below-fire
-end
-
-
-to count-duration-below
-  ask below-fires-here
-  [
-    set duration duration + 1
-  ]
-end
-
-to count-duration-above
-  ask fires-here
-  [
-    set duration duration + 1
-  ]
 end

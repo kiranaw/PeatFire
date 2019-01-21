@@ -15,7 +15,7 @@ patches-own[
   selection-index
   water-table
   vulnerability
-  burned?
+  burning? ; if TRUE = fire has been ignited and patch is burning
   biomass
   left-biomass
   left-biomass-below
@@ -23,11 +23,11 @@ patches-own[
   direction
   probability
   inundated?
-  below-fire-neighbor?
   fire-to-patch
   max-duration-below
   in-reserve?
   p-spread-below
+  burnt? ; if TRUE = all biomass burnt out
 ]
 
 fires-own[
@@ -42,12 +42,11 @@ below-fires-own[
 
 to setup
   ca
-  ask patches [set below-fire-neighbor? false]
   set-biomass
   set-wtd
   set-biomass-below
   set-evap-rate
-  set-burned-status
+  set-burn-status
   set-selection-index
   set-households
   set-update-vulnerability
@@ -93,16 +92,17 @@ end
 to search-and-ignite
   ask households
   [
-      ifelse [burned?] of patch-here = true
+      ifelse [burning?] of patch-here = true
       [search-land]
       [check-ignite]
   ]
 end
 
-to set-burned-status
+to set-burn-status
   ask patches
   [
-    set burned? false
+    set burning? false ; no patch is being ignited
+    set burnt? false ; no patch is burnt (run out of biomass)
   ]
 end
 
@@ -163,46 +163,28 @@ end
 to fire-process
   ask patches
   [
-    if any? fires-here
+    if any? fires-here and burnt? = FALSE
     [
       set left-biomass left-biomass - bbr
-      count-duration-above
+      if left-biomass >= 0
+      [
+        set burnt? TRUE
+        set burnt-patches burnt-patches + 1
+      ]
     ]
     if any? below-fires-here
     [
       set left-biomass-below left-biomass-below - bbr
-      count-duration-below
       if (vulnerability = 0 or left-biomass-below <= 0)
       [
         terminate-below-fire
       ]
     ]
-    if (left-biomass <= 0 or inundated? = true) and any? fires-here
+    if (burnt? = TRUE or inundated? = true) and any? fires-here
     [
       terminate-above-fire
+      set burning? false
     ]
-  ]
-end
-
-to set-neighbors-below
-  ifelse spread-to-eight? = true
-  [
-    ask neighbors
-    [
-      set below-fire-neighbor? true
-    ]
-  ]
-  [
-    ask neighbors4
-    [
-      set below-fire-neighbor? true
-    ]
-  ]
-end
-
-to psb-wtd
-  ask patches with [left-biomass-below > 0] [
-    set p-spread-below wtd
   ]
 end
 
@@ -298,7 +280,6 @@ to terminate-below-fire
      set dead-below dead-below + 1
      set fire-duration duration
      set pcolor black
-     set below-fire-neighbor? false
      die
   ]
 end
@@ -352,7 +333,7 @@ end
 
 to search-land
   set destination-patch 0
-  if [burned?] of patch-here = true and any? target-destination
+  if [burning?] of patch-here = true and any? target-destination
   [
     set destination-patch one-of target-destination
     move-to destination-patch
@@ -370,20 +351,20 @@ to check-ignite
 end
 
 to-report target-destination
-  report patches with [selection-index > 2 and distance myself <= dst and burned? = false]
+  report patches with [selection-index > 2 and distance myself <= dst and burning? = false]
 end
 
 to-report initial-position
-  report patches with [selection-index > 2 and burned? = false]
+  report patches with [selection-index > 2 and burning? = false]
 end
 
 to ignite-above
-  if not any? fires-here and burned? = false
+  if not any? fires-here and burning? = false
   [
     sprout-fires 1
     [
       set color red
-      set burned? true
+      set burning? true
       set size 2
       set shape "fire"
       set source "ignition"
@@ -400,12 +381,12 @@ to ignite-above
 end
 
 to ignite-above-from-below
-  if not any? fires-here and burned? = false
+  if not any? fires-here and burning? = false
   [
     sprout-fires 1
     [
       set color pink
-      set burned? true
+      set burning? true
       set size 2
       set shape "fire"
       set source "from below"
@@ -420,7 +401,6 @@ to ignite-below
   sprout-below-fires 1
     [
       set color violet
-      set burned? true
       set size 2
       set shape "fire"
       set source "from above"
@@ -453,56 +433,6 @@ to spread-below
   set spread-fire-below spread-fire-below + 1
 end
 
-to make-reserve2
-  loop
-  [
-    let reserve [patches in-radius round (sqrt (reserve-area / pi))] of one-of patches
-    if all? (patch-set [neighbors] of reserve) [in-reserve? = false and pxcor < max-pxcor and pxcor > min-pxcor and pycor < max-pycor and pycor > min-pycor]
-    [
-      ask reserve
-      [
-        set water-table random-normal-in-bounds wtd-in-reserve 0.2 -0.5 1
-        set in-reserve? true
-        set pcolor blue
-      ]
-      stop
-    ]
-  ]
-end
-
-to make-reserve
-  ifelse n-of-reserve > 1
-  [
-    let centers patches with [(pxcor = 25 and pycor = 25) or (pxcor = 25 and pycor = 75) or (pxcor = 75 and pycor = 75) or (pxcor = 75 and pycor = 25)]
-
-    ask one-of centers with [in-reserve? = false]
-    [
-      ask patches in-radius round (sqrt (reserve-area / pi))
-      [
-        set water-table random-normal-in-bounds wtd-in-reserve 0.2 -0.5 1
-        set pcolor round (53 + (water-table))
-        set in-reserve? true
-        set pcolor blue
-      ]
-      set-ind
-    ]
-  ]
-  [
-    let center patches with [pxcor = 50 and pycor = 50]
-    ask center
-    [
-      ask patches in-radius round (sqrt (reserve-area / pi))
-      [
-        set water-table random-normal-in-bounds wtd-in-reserve 0.2 -0.5 1
-        set pcolor round (53 + (water-table))
-        set in-reserve? true
-        set pcolor blue
-      ]
-      set-ind
-    ]
-  ]
-end
-
 to set-wtd
   ask patches
   [
@@ -511,10 +441,6 @@ to set-wtd
     set-ind
     set in-reserve? false
   ]
-  let total-reserve-area round (reserve-proportion * count patches)
-  if n-of-reserve > 0
-  [set reserve-area round (total-reserve-area / n-of-reserve)
-  repeat n-of-reserve [make-reserve]]
 end
 
 to set-ind
@@ -751,7 +677,7 @@ dbi
 dbi
 0
 10
-1.0
+5.0
 1
 1
 NIL
@@ -916,7 +842,7 @@ SWITCH
 465
 spread-above?
 spread-above?
-1
+0
 1
 -1000
 
@@ -983,7 +909,7 @@ SWITCH
 545
 spread-to-eight?
 spread-to-eight?
-1
+0
 1
 -1000
 
@@ -994,7 +920,7 @@ SWITCH
 505
 spread-below?
 spread-below?
-1
+0
 1
 -1000
 
@@ -1064,21 +990,6 @@ spread-fire-below
 1
 11
 
-SLIDER
-11
-605
-140
-638
-wtd-in-reserve
-wtd-in-reserve
-0
-0.5
-0.25
-0.1
-1
-NIL
-HORIZONTAL
-
 MONITOR
 488
 525
@@ -1100,36 +1011,6 @@ count patches with [in-reserve? = false]
 17
 1
 11
-
-SLIDER
-12
-654
-142
-687
-n-of-reserve
-n-of-reserve
-0
-4
-0.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-11
-561
-142
-594
-reserve-proportion
-reserve-proportion
-0.1
-0.5
-0.3
-0.05
-1
-NIL
-HORIZONTAL
 
 MONITOR
 491
@@ -1180,6 +1061,28 @@ true
 "" ""
 PENS
 "rainfall" 1.0 0 -15390905 true "" "if ticks > 0 [plot item (ticks - 1) rainfall-data]"
+
+MONITOR
+611
+562
+703
+607
+NIL
+burnt-patches
+17
+1
+11
+
+MONITOR
+742
+570
+860
+615
+NIL
+sum-burnt-patches
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
