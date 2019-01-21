@@ -8,7 +8,6 @@ to reset-total-fires
   set sum-ffa sum-ffa + fires-from-above
   set sum-sfa sum-sfa + spread-fire-above
   set sum-sfb sum-sfb + spread-fire-below
-  set sum-burnt-patches sum-burnt-patches + burnt-patches
 
   set human-ignited 0
   set total-fire 0
@@ -18,7 +17,6 @@ to reset-total-fires
   set fires-from-above 0
   set spread-fire-above 0
   set spread-fire-below 0
-  set sum-burnt-patches 0
 end
 
 to set-lists
