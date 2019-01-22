@@ -1,41 +1,18 @@
 globals[
-  threshold
   rainfall-data
   raindays-data
   rain-days
-  dead-above
-  dead-below
   count-dry-days
-  cell-size
-  patches-selected
-  fire-duration
   total-fire
-  human-ignited
   total-fire-above
   total-below-fire
-  fires-from-below
-  fires-from-above
-  spread-fire-above
-  spread-fire-below
   burnt-patches
-  sum-hi
   sum-tf
   sum-tfb
   sum-tfa
-  sum-ffb
-  sum-ffa
-  sum-sfa
-  sum-sfb
   list-tf
   list-tfa
   list-tfb
-  list-ffb
-  list-ffa
-  list-sfa
-  list-sfb
-  list-hi
   list-burnt-patches
-  p-in-rev
-  reserve-area
-  reserve?
+  list-unburnt-patches
 ]

@@ -24,20 +24,9 @@ patches-own[
   probability
   inundated?
   fire-to-patch
-  max-duration-below
   in-reserve?
   p-spread-below
   burnt? ; if TRUE = all biomass burnt out
-]
-
-fires-own[
-  duration
-  source
-]
-
-below-fires-own[
-  duration
-  source
 ]
 
 to setup
@@ -195,23 +184,12 @@ to fire-spread
     [
       ignite-below
     ]
-    ifelse spread-to-eight? = true and spread-above? = true
+    if spread-above? = true
     [
-      ask neighbors
+      ifelse spread-to-eight? = true
       [
-        set fire-to-patch towards myself
-        let prob calculate-probability wind-direction-degree fire-to-patch
-        if prob = 0 [set prob 0.01]
-        set probability prob * wsp
-        if random-float 1 < probability and not any? fires-here and left-biomass > 0 and inundated? = false
+        ask neighbors
         [
-          spread-above
-        ]
-      ]
-    ]
-    [
-      ask neighbors4
-      [
           set fire-to-patch towards myself
           let prob calculate-probability wind-direction-degree fire-to-patch
           if prob = 0 [set prob 0.01]
@@ -220,6 +198,20 @@ to fire-spread
           [
             spread-above
           ]
+        ]
+      ]
+      [
+        ask neighbors4
+        [
+          set fire-to-patch towards myself
+          let prob calculate-probability wind-direction-degree fire-to-patch
+          if prob = 0 [set prob 0.01]
+          set probability prob * wsp
+          if random-float 1 < probability and not any? fires-here and left-biomass > 0 and inundated? = false
+          [
+            spread-above
+          ]
+        ]
       ]
     ]
   ]
@@ -267,8 +259,6 @@ end
 to terminate-above-fire
   ask fires-here
   [
-     set dead-above dead-above + 1
-     set fire-duration duration
      set pcolor black
      die
   ]
@@ -277,8 +267,6 @@ end
 to terminate-below-fire
   ask below-fires-here
   [
-     set dead-below dead-below + 1
-     set fire-duration duration
      set pcolor black
      die
   ]
@@ -367,7 +355,6 @@ to ignite-above
       set burning? true
       set size 2
       set shape "fire"
-      set source "ignition"
     ]
     ask households-here [
       ifelse power = 0
@@ -375,7 +362,6 @@ to ignite-above
       [set power power - 1]
     ]
     set total-fire-above total-fire-above + 1
-    set human-ignited human-ignited + 1
     set selection-index 0
   ]
 end
@@ -389,10 +375,8 @@ to ignite-above-from-below
       set burning? true
       set size 2
       set shape "fire"
-      set source "from below"
     ]
     set total-fire-above total-fire-above + 1
-    set fires-from-below fires-from-below + 1
     set selection-index 0
   ]
 end
@@ -403,11 +387,8 @@ to ignite-below
       set color violet
       set size 2
       set shape "fire"
-      set source "from above"
-      set duration 1
     ]
   set total-below-fire total-below-fire + 1
-  set fires-from-above fires-from-above + 1
 end
 
 to spread-above
@@ -418,7 +399,6 @@ to spread-above
      set color red
   ]
   set total-fire-above total-fire-above + 1
-  set spread-fire-above spread-fire-above + 1
 end
 
 to spread-below
@@ -427,10 +407,8 @@ to spread-below
      set shape "fire"
      set size 1
      set color violet
-     set duration 1
   ]
   set total-below-fire total-below-fire + 1
-  set spread-fire-below spread-fire-below + 1
 end
 
 to set-wtd
@@ -553,7 +531,7 @@ frm
 frm
 0
 100
-55.0
+50.0
 1
 1
 NIL
@@ -585,7 +563,7 @@ MONITOR
 873
 475
 above fires
-total-fire-above
+sum-tfa
 3
 1
 11
@@ -615,7 +593,7 @@ dst
 10
 100
 55.0
-10
+1
 1
 NIL
 HORIZONTAL
@@ -784,12 +762,12 @@ NIL
 HORIZONTAL
 
 MONITOR
-800
-487
-873
-532
+885
+432
+958
+477
 below fires
-total-below-fire
+sum-tfb
 17
 1
 11
@@ -810,10 +788,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-694
-489
-788
-534
+711
+491
+805
+536
 inundated (%)
 (count patches with [inundated? = true] / count patches) * 100
 2
@@ -845,17 +823,6 @@ spread-above?
 0
 1
 -1000
-
-MONITOR
-587
-490
-680
-535
-fires from below
-count fires with [source = \"from below\"]
-4
-1
-11
 
 SLIDER
 177
@@ -903,10 +870,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-12
-512
-144
-545
+13
+518
+145
+551
 spread-to-eight?
 spread-to-eight?
 0
@@ -935,99 +902,11 @@ sum-tf
 1
 11
 
-MONITOR
-882
-430
-932
-475
-NIL
-sum-tfb
-17
-1
-11
-
-MONITOR
-884
-486
-990
-531
-NIL
-fires-from-above
-17
-1
-11
-
-MONITOR
-937
-431
-987
-476
-NIL
-sum-hi
-17
-1
-11
-
-MONITOR
-996
-430
-1098
-475
-NIL
-spread-fire-above
-17
-1
-11
-
-MONITOR
-995
-485
-1097
-530
-NIL
-spread-fire-below
-17
-1
-11
-
-MONITOR
-488
-525
-573
-570
-p-in-reserve
-count patches with [in-reserve? = true]
-17
-1
-11
-
-MONITOR
-489
-581
-573
-626
-p-out-reserve
-count patches with [in-reserve? = false]
-17
-1
-11
-
-MONITOR
-491
-642
-548
-687
-ra
-reserve-area
-17
-1
-11
-
 SWITCH
-178
-529
-322
-562
+174
+519
+318
+552
 random-rainfall?
 random-rainfall?
 0
@@ -1035,10 +914,10 @@ random-rainfall?
 -1000
 
 CHOOSER
-331
-530
-469
-575
+327
+520
+465
+565
 rain-distribution
 rain-distribution
 "normal" "gamma"
@@ -1063,12 +942,23 @@ PENS
 "rainfall" 1.0 0 -15390905 true "" "if ticks > 0 [plot item (ticks - 1) rainfall-data]"
 
 MONITOR
-611
-562
-703
-607
-NIL
+589
+490
+639
+535
+burnt
 burnt-patches
+17
+1
+11
+
+MONITOR
+646
+490
+703
+535
+unburnt
+count patches - burnt-patches
 17
 1
 11
