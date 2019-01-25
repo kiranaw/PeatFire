@@ -74,6 +74,7 @@ to set-households
         set power round(random-normal-in-bounds frp 1 0 4)
         set xcor [pxcor] of myself
         set ycor [pycor] of myself
+        hide-turtle
       ]
   ]]
 end
@@ -577,7 +578,7 @@ dth
 dth
 0.1
 1
-0.55
+0.54
 0.01
 1
 NIL
@@ -622,7 +623,7 @@ evp
 evp
 0.003
 0.01
-0.0066
+0.0065
 0.0002
 1
 NIL
@@ -631,7 +632,7 @@ HORIZONTAL
 PLOT
 585
 28
-895
+892
 217
 water table dynamics
 NIL
@@ -692,7 +693,7 @@ wtd
 wtd
 0
 1
-0.5
+0.6
 0.05
 1
 NIL
@@ -807,7 +808,7 @@ ind
 ind
 0
 0.2
-0.0
+0.2
 0.01
 1
 NIL
@@ -833,7 +834,7 @@ wsp
 wsp
 0.1
 1
-1.0
+0.325
 0.1
 1
 NIL
@@ -863,7 +864,7 @@ psb
 psb
 0.1
 1
-1.0
+0.1
 0.1
 1
 NIL
