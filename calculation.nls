@@ -59,7 +59,7 @@ to set-burnt-val
 end
 
 to-report raster-output [filename]
-  ifelse ticks = 30
+  ifelse ticks = 365
   [
   set-burnt-val
   ;create raster with a given file name
