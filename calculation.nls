@@ -1,3 +1,8 @@
+globals
+[
+  test_file
+]
+
 ; ini adalah untuk menjumlahkan total api dari tick ke tick sampai habis
 to reset-total-fires
   set sum-tf sum-tf + total-fire
@@ -28,4 +33,41 @@ end
 
 to count-fires
   set total-fire total-fire-above + total-below-fire
+end
+
+to-report random-normal-in-bounds [mid dev mmin mmax]
+  let result random-normal mid dev
+  if result < mmin or result > mmax
+    [ report random-normal-in-bounds mid dev mmin mmax ]
+  report result
+end
+
+to-report random-gamma-in-bounds [alpha lambda mmin mmax]
+  let result random-gamma alpha lambda
+  if result < mmin or result > mmax
+    [ report random-gamma-in-bounds alpha lambda mmin mmax ]
+  report result
+end
+
+to set-burnt-val
+  ask patches
+  [
+    ifelse burnt? = true
+    [set burnval 1]
+    [set burnval 0]
+  ]
+end
+
+to-report raster-output [filename]
+  ifelse ticks = 30
+  [
+  set-burnt-val
+  ;create raster with a given file name
+  gis:set-transformation (list -180 180 -90 90) (list min-pxcor max-pxcor min-pycor max-pycor)
+  ask patches [
+    set test_file gis:patch-dataset burnval ;change this, we are not using pcolor, we are using burnt or not burnt
+  ]
+  gis:store-dataset test_file (word filename "-" wtd ".asc")
+    report true]
+  [report false]
 end
