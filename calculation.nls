@@ -58,7 +58,7 @@ to set-burnt-val
   ]
 end
 
-to-report raster-output [filename]
+to-report raster-output [filename param]
   ifelse ticks = 365
   [
   set-burnt-val
@@ -67,7 +67,7 @@ to-report raster-output [filename]
   ask patches [
     set test_file gis:patch-dataset burnval ;change this, we are not using pcolor, we are using burnt or not burnt
   ]
-  gis:store-dataset test_file (word filename "-" wtd ".asc")
+  gis:store-dataset test_file (word filename param ".asc")
     report true]
   [report false]
 end
