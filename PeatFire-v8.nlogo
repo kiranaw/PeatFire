@@ -46,8 +46,8 @@ end
 
 to go
   if ticks >= 365 [stop]
-  repeat 365
-  [
+  ;repeat 365
+  ;[
     reset-total-fires
     tick
     search-and-ignite
@@ -59,8 +59,8 @@ to go
     set-update-vulnerability
     sum-dry-days
     save-fires-ticks
-;    reset-total-fires
-  ]
+    reset-total-fires
+  ;]
 end
 
 to set-households
@@ -513,7 +513,7 @@ BUTTON
 59
 NIL
 go
-NIL
+T
 1
 T
 OBSERVER
@@ -693,7 +693,7 @@ wtd
 wtd
 0
 1
-0.6
+0.5
 0.05
 1
 NIL
@@ -808,7 +808,7 @@ ind
 ind
 0
 0.2
-0.2
+0.1
 0.01
 1
 NIL
@@ -834,7 +834,7 @@ wsp
 wsp
 0.1
 1
-0.325
+0.55
 0.1
 1
 NIL
@@ -864,7 +864,7 @@ psb
 psb
 0.1
 1
-0.1
+0.55
 0.1
 1
 NIL
