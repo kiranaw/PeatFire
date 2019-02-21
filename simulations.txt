@@ -1,0 +1,4 @@
+ignite probability
+farmers
+dry threshold
+evapotranspiration
