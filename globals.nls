@@ -19,4 +19,5 @@ globals[
   n-rows
   xll
   yll
+  cell-size
 ]
