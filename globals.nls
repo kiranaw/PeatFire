@@ -15,4 +15,8 @@ globals[
   list-tfb
   list-burnt-patches
   list-unburnt-patches
+  n-cols
+  n-rows
+  xll
+  yll
 ]
