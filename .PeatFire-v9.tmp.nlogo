@@ -433,26 +433,26 @@ end
 to set-wtd-moisture-map ;-0.5 to 1
   ask patches
   [
-    if map-value = 1 [set water-table 1.000 - random-float 0.075]
-    if map-value = 2 [set water-table 0.926 - random-float 0.075]
-    if map-value = 3 [set water-table 0.851 - random-float 0.075]
-    if map-value = 4 [set water-table 0.776 - random-float 0.075]
-    if map-value = 5 [set water-table 0.701 - random-float 0.075]
-    if map-value = 6 [set water-table 0.626 - random-float 0.075]
-    if map-value = 7 [set water-table 0.551 - random-float 0.075]
-    if map-value = 8 [set water-table 0.476 - random-float 0.075]
-    if map-value = 9 [set water-table 0.401 - random-float 0.075]
-    if map-value = 10 [set water-table 0.326 - random-float 0.075]
-    if map-value = 11 [set water-table 0.251 - random-float 0.075]
-    if map-value = 12 [set water-table 0.176 - random-float 0.075]
-    if map-value = 13 [set water-table 0.101 - random-float 0.075]
-    if map-value = 14 [set water-table 0.026 - random-float 0.075]
-    if map-value = 15 [set water-table -0.051 - random-float 0.075]
-    if map-value = 16 [set water-table -0.126 - random-float 0.075]
-    if map-value = 17 [set water-table -0.201 - random-float 0.075]
-    if map-value = 18 [set water-table -0.276 - random-float 0.075]
-    if map-value = 19 [set water-table -0.351 - random-float 0.075]
-    if map-value = 20 [set water-table -0.426 - random-float 0.075]
+    if map-value = 20 [set water-table 1.000 - random-float 0.075]
+    if map-value = 19 [set water-table 0.926 - random-float 0.075]
+    if map-value = 18 [set water-table 0.851 - random-float 0.075]
+    if map-value = 17 [set water-table 0.776 - random-float 0.075]
+    if map-value = 16 [set water-table 0.701 - random-float 0.075]
+    if map-value = 15 [set water-table 0.626 - random-float 0.075]
+    if map-value = 14 [set water-table 0.551 - random-float 0.075]
+    if map-value = 13 [set water-table 0.476 - random-float 0.075]
+    if map-value = 12 [set water-table 0.401 - random-float 0.075]
+    if map-value = 11 [set water-table 0.326 - random-float 0.075]
+    if map-value = 10 [set water-table 0.251 - random-float 0.075]
+    if map-value = 9 [set water-table 0.176 - random-float 0.075]
+    if map-value = 8 [set water-table 0.101 - random-float 0.075]
+    if map-value = 7 [set water-table 0.026 - random-float 0.075]
+    if map-value = 6 [set water-table -0.051 - random-float 0.075]
+    if map-value = 5 [set water-table -0.126 - random-float 0.075]
+    if map-value = 4 [set water-table -0.201 - random-float 0.075]
+    if map-value = 3 [set water-table -0.276 - random-float 0.075]
+    if map-value = 2 [set water-table -0.351 - random-float 0.075]
+    if map-value = 1 [set water-table -0.426 - random-float 0.075]
   ]
 end
 
@@ -585,7 +585,7 @@ frm
 frm
 0
 100
-50.0
+100.0
 1
 1
 NIL
@@ -631,7 +631,7 @@ dth
 dth
 0.1
 1
-0.54
+0.4
 0.01
 1
 NIL
@@ -709,7 +709,7 @@ dbi
 dbi
 0
 10
-7.0
+3.0
 1
 1
 NIL
