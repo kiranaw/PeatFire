@@ -28,6 +28,7 @@ patches-own[
   p-spread-below
   burnt? ; if TRUE = all biomass burnt out
   burnval
+  map-value
 ]
 
 to setup
@@ -410,12 +411,48 @@ to spread-below
 end
 
 to set-wtd
+  ifelse random-wtd? = TRUE
+  [
+    ask patches
+    [
+      set water-table random-normal-in-bounds wtd 0.1 -0.5 1
+    ]
+  ]
+  [
+    setup-function moisture-map
+    set-wtd-moisture-map
+  ]
   ask patches
   [
-    set water-table random-normal-in-bounds wtd 0.1 -0.5 1
     set pcolor round (53 + (water-table))
     set-ind
     set in-reserve? false
+  ]
+end
+
+to set-wtd-moisture-map ;-0.5 to 1
+  ask patches
+  [
+    if map-value = 20 [set water-table 1.000 - random-float 0.075]
+    if map-value = 19 [set water-table 0.926 - random-float 0.075]
+    if map-value = 18 [set water-table 0.851 - random-float 0.075]
+    if map-value = 17 [set water-table 0.776 - random-float 0.075]
+    if map-value = 16 [set water-table 0.701 - random-float 0.075]
+    if map-value = 15 [set water-table 0.626 - random-float 0.075]
+    if map-value = 14 [set water-table 0.551 - random-float 0.075]
+    if map-value = 13 [set water-table 0.476 - random-float 0.075]
+    if map-value = 12 [set water-table 0.401 - random-float 0.075]
+    if map-value = 11 [set water-table 0.326 - random-float 0.075]
+    if map-value = 10 [set water-table 0.251 - random-float 0.075]
+    if map-value = 9 [set water-table 0.176 - random-float 0.075]
+    if map-value = 8 [set water-table 0.101 - random-float 0.075]
+    if map-value = 7 [set water-table 0.026 - random-float 0.075]
+    if map-value = 6 [set water-table -0.051 - random-float 0.075]
+    if map-value = 5 [set water-table -0.126 - random-float 0.075]
+    if map-value = 4 [set water-table -0.201 - random-float 0.075]
+    if map-value = 3 [set water-table -0.276 - random-float 0.075]
+    if map-value = 2 [set water-table -0.351 - random-float 0.075]
+    if map-value = 1 [set water-table -0.426 - random-float 0.075]
   ]
 end
 
@@ -443,6 +480,39 @@ end
 
 to set-evap-rate
   ask patches [set evap-rate evp * biomass]
+end
+
+to setup-function [m]
+  read-map-attributes m
+  read-input-maps m
+end
+
+to read-map-attributes[m]
+  let data-source word "input-map/" m
+  file-open data-source
+  set n-cols read-from-string remove "NCOLS" file-read-line
+  set n-rows read-from-string
+  remove "NROWS" file-read-line
+  set xll read-from-string remove "XLLCORNER" file-read-line
+  set yll read-from-string remove "YLLCORNER" file-read-line
+  set cell-size read-from-string remove "CELLSIZE"file-read-line
+  file-close
+  ;resize-map
+end
+
+to read-input-maps[m]
+  let data-source word "input-map/" m
+  let input-map read-map data-source
+  gis:apply-raster input-map map-value
+  ask patches
+  [set map-value ifelse-value (map-value <= 0 or map-value >= 0)
+  [map-value]
+  [-9999]]
+end
+
+to-report read-map[m]
+  let raster-map gis:load-dataset m
+  report raster-map
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -561,7 +631,7 @@ dth
 dth
 0.1
 1
-0.54
+0.55
 0.01
 1
 NIL
@@ -887,21 +957,21 @@ sum-tf
 11
 
 SWITCH
-174
-519
-318
-552
+165
+516
+309
+549
 random-rainfall?
 random-rainfall?
-0
+1
 1
 -1000
 
 CHOOSER
-327
-520
-465
-565
+316
+517
+428
+562
 rain-distribution
 rain-distribution
 "normal" "gamma"
@@ -946,6 +1016,27 @@ count patches - burnt-patches
 17
 1
 11
+
+SWITCH
+445
+517
+573
+550
+random-wtd?
+random-wtd?
+1
+1
+-1000
+
+CHOOSER
+827
+493
+965
+538
+moisture-map
+moisture-map
+"moisture.asc"
+0
 
 @#$#@#$#@
 ## WHAT IS IT?
