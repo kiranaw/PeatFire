@@ -76,7 +76,7 @@ to set-households
   if farmers-dist = "clumped"
   [
     repeat frm[
-      ask one-of patches with [any? households-here = false and in-reserve? = false and ((pxcor < 10 and pycor > 90))]
+      ask one-of patches with [any? households-here = false and in-reserve? = false and ((pxcor < 10 and pycor < 10))]
       [
         make-households
     ]
@@ -295,7 +295,7 @@ end
 to terminate-below-fire
   ask below-fires-here
   [
-     set pcolor black
+     ;set pcolor black
      die
   ]
 end
@@ -674,8 +674,8 @@ SLIDER
 dst
 dst
 5
-50
-28.0
+25
+15.0
 1
 1
 NIL
@@ -704,8 +704,8 @@ SLIDER
 evp
 evp
 0.003
-0.01
-0.0065
+0.005
+0.004
 0.0002
 1
 NIL
@@ -1075,7 +1075,7 @@ CHOOSER
 farmers-dist
 farmers-dist
 "random" "clumped" "regular"
-1
+0
 
 CHOOSER
 963

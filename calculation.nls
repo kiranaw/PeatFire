@@ -59,7 +59,7 @@ to set-burnt-val
 end
 
 to-report raster-output [filename param]
-  ifelse ticks = 365
+  ifelse ticks = simulation-time
   [
   set-burnt-val
   ;create raster with a given file name
