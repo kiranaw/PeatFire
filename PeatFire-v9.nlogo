@@ -47,7 +47,9 @@ to setup
 end
 
 to go
-  if ticks = 365 [stop]
+  if ticks = simulation-time [stop]
+  repeat simulation-time
+  [
     reset-total-fires
     tick
     search-and-ignite
@@ -59,22 +61,49 @@ to go
     set-update-vulnerability
     sum-dry-days
     save-fires-ticks
+  ]
 end
 
 to set-households
-  repeat frm[
-    ask one-of initial-position with [any? households-here = false and in-reserve? = false]
-    [
-      sprout-households 1[
-        set shape "person"
-        set color blue + 2
-        set size 3
-        set power round(random-normal-in-bounds frp 1 0 4)
-        set xcor [pxcor] of myself
-        set ycor [pycor] of myself
-        hide-turtle
-      ]
-  ]]
+  if farmers-dist = "random"
+  [
+    repeat frm[
+      ask one-of patches with [any? households-here = false and in-reserve? = false]
+      [
+        make-households
+    ]]
+  ]
+  if farmers-dist = "clumped"
+  [
+    repeat frm[
+      ask one-of patches with [any? households-here = false and in-reserve? = false and ((pxcor < 10 and pycor > 90))]
+      [
+        make-households
+    ]
+    ]
+  ]
+  if farmers-dist = "regular"
+  [
+    repeat 50[
+      ask one-of patches with [any? households-here = false and in-reserve? = false and (pycor mod 20 = 10)
+          and ((pxcor - 5) mod 10 = 0)]
+      [
+        make-households
+    ]
+    ]
+  ]
+end
+
+to make-households
+  sprout-households 1[
+          set shape "person"
+          set color blue + 2
+          set size 3
+          set power round(random-normal-in-bounds frp 1 0 4)
+          set xcor [pxcor] of myself
+          set ycor [pycor] of myself
+          ;hide-turtle
+        ]
 end
 
 to search-and-ignite
@@ -277,12 +306,12 @@ to set-rainfall
   ifelse random-rainfall? = FALSE
   [
     set rainfall-data []
-    file-open "rainfall.txt"
+    file-open rainfall
     while [not file-at-end?] [set rainfall-data lput file-read rainfall-data]
     file-close
 
     set raindays-data []
-    file-open "raindays.txt"
+    file-open raindays
     while [not file-at-end?] [set raindays-data lput file-read raindays-data]
     file-close
   ]
@@ -644,9 +673,9 @@ SLIDER
 190
 dst
 dst
-10
-100
-55.0
+5
+50
+28.0
 1
 1
 NIL
@@ -708,8 +737,8 @@ SLIDER
 dbi
 dbi
 0
-10
-5.0
+35
+18.0
 1
 1
 NIL
@@ -917,7 +946,7 @@ psb
 psb
 0.1
 1
-0.55
+0.5
 0.1
 1
 NIL
@@ -1029,14 +1058,54 @@ random-wtd?
 -1000
 
 CHOOSER
-827
-493
-965
-538
+813
+489
+951
+534
 moisture-map
 moisture-map
 "moisture.asc"
 0
+
+CHOOSER
+964
+428
+1056
+473
+farmers-dist
+farmers-dist
+"random" "clumped" "regular"
+1
+
+CHOOSER
+963
+487
+1057
+532
+simulation-time
+simulation-time
+365 183
+1
+
+CHOOSER
+1066
+428
+1178
+473
+rainfall
+rainfall
+"rainfall.txt" "rainfall183.txt"
+1
+
+CHOOSER
+1065
+488
+1173
+533
+raindays
+raindays
+"raindays.txt" "raindays183.txt"
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
