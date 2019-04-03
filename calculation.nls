@@ -35,6 +35,10 @@ to count-fires
   set total-fire total-fire-above + total-below-fire
 end
 
+;code snippet taken from StackOverflow 
+;URL: https://stackoverflow.com/questions/20230685/netlogo-how-to-make-sure-a-variable-stays-in-a-defined-range
+;asked by Marzy (https://stackoverflow.com/users/2419462/marzy)
+;answered by Seth Tisue (https://stackoverflow.com/users/86485/seth-tisue)
 to-report random-normal-in-bounds [mid dev mmin mmax]
   let result random-normal mid dev
   if result < mmin or result > mmax
@@ -42,6 +46,10 @@ to-report random-normal-in-bounds [mid dev mmin mmax]
   report result
 end
 
+;modified from a solution in StackOverflow
+;URL: https://stackoverflow.com/questions/20230685/netlogo-how-to-make-sure-a-variable-stays-in-a-defined-range
+;asked by Marzy (https://stackoverflow.com/users/2419462/marzy)
+;answered by Seth Tisue (https://stackoverflow.com/users/86485/seth-tisue)
 to-report random-gamma-in-bounds [alpha lambda mmin mmax]
   let result random-gamma alpha lambda
   if result < mmin or result > mmax
@@ -58,6 +66,10 @@ to set-burnt-val
   ]
 end
 
+;modified from a solution in GitHub
+;URL: https://github.com/NetLogo/GIS-Extension/issues/14
+;asked by Sean Bergin (https://github.com/seanbergin)
+;answered by Lukepc (https://github.com/lukepc)
 to-report raster-output [filename param]
   ifelse ticks = simulation-time
   [
@@ -68,6 +80,20 @@ to-report raster-output [filename param]
     set test_file gis:patch-dataset burnval ;change this, we are not using pcolor, we are using burnt or not burnt
   ]
   gis:store-dataset test_file (word filename param ".asc")
-    report true]
+    report true
+  ]
   [report false]
+end
+
+to-report rastervar
+  if ticks = simulation-time
+  [
+    set-burnt-val
+    ;create raster with a given file name
+    gis:set-transformation (list -180 180 -90 90) (list min-pxcor max-pxcor min-pycor max-pycor)
+    ask patches [
+      set test_file gis:patch-dataset burnval ;change this, we are not using pcolor, we are using burnt or not burnt
+    ]
+    report test_file
+  ]
 end
