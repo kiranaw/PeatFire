@@ -58,7 +58,6 @@ to go
     count-fires ;calculation purpose
 
     update-water-table
-    sum-dry-days
   ]
   ;print idrun ;for id in nlrx
 end
@@ -108,9 +107,11 @@ to update-water-table
     ifelse item (ticks - 1) raindays-data = 1
     [
       set water-table water-table - item (ticks - 1) rainfall-data
+      set count-dry-days 0
     ]
     [
       set water-table water-table + evap-rate ;also condition for dry-days++
+      set count-dry-days count-dry-days + 1
     ]
 
     check-wtd-range
@@ -129,16 +130,6 @@ to check-wtd-range
     [
       set water-table 1
     ]
-end
-
-to sum-dry-days
-  ifelse ( item (ticks - 1) raindays-data = -1)
-  [
-    set count-dry-days count-dry-days + 1
-  ]
-  [
-    set count-dry-days 0
-  ]
 end
 
 to set-selection-index
@@ -162,6 +153,7 @@ end
 to fire-process
   ask patches
   [
+    ;above-ground fire
     if any? fires-here and burnt? = FALSE
     [
       set left-biomass left-biomass - bbr
@@ -171,7 +163,15 @@ to fire-process
         set burnval 1
         set burnt-patches burnt-patches + 1
       ]
+
+      if (burnt? = TRUE or inundated? = true)
+      [
+        terminate-above-fire
+        set burning? false
+      ]
     ]
+
+    ;below-ground fire
     if any? below-fires-here
     [
       set left-biomass-below left-biomass-below - bbr
@@ -180,11 +180,8 @@ to fire-process
         terminate-below-fire
       ]
     ]
-    if (burnt? = TRUE or inundated? = true) and any? fires-here
-    [
-      terminate-above-fire
-      set burning? false
-    ]
+
+
   ]
 end
 
@@ -526,7 +523,7 @@ frm
 frm
 0
 100
-54.0
+0.0
 1
 1
 NIL
@@ -572,7 +569,7 @@ dth
 dth
 0
 0.9
-0.71
+0.0
 0.01
 1
 NIL
@@ -587,7 +584,7 @@ dst
 dst
 5
 25
-16.0
+0.0
 1
 1
 NIL
@@ -602,7 +599,7 @@ igp
 igp
 0.1
 1
-0.7
+0.0
 0.1
 1
 NIL
@@ -617,7 +614,7 @@ evp
 evp
 0.003
 0.005
-0.004
+0.0
 0.0002
 1
 NIL
@@ -650,7 +647,7 @@ dbi
 dbi
 0
 35
-17.0
+0.0
 1
 1
 NIL
@@ -687,7 +684,7 @@ wtd
 wtd
 0
 1
-0.5
+0.0
 0.05
 1
 NIL
@@ -702,7 +699,7 @@ frp
 frp
 1
 5
-3.0
+0.0
 1
 1
 NIL
@@ -717,7 +714,7 @@ bia
 bia
 0
 1
-0.5
+0.0
 0.1
 1
 NIL
@@ -832,7 +829,7 @@ bib
 bib
 0
 1
-0.5
+0.0
 .1
 1
 NIL
@@ -950,7 +947,7 @@ INPUTBOX
 1440
 271
 idrun
-NIL
+0
 1
 0
 String
