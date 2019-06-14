@@ -46,18 +46,17 @@ to setup
 end
 
 to go
-  if ticks = simulation-time [stop]
+  if ticks > simulation-time [stop]
   repeat simulation-time
   [
-    reset-total-fires ;calculation purpose
     tick
     search-and-ignite
-
+    reset-total-fires ;calculation purpose
     fire-process
     fire-spread
-    count-fires ;calculation purpose
 
     update-water-table
+    show count-dry-days
   ]
   ;print idrun ;for id in nlrx
 end
@@ -103,21 +102,29 @@ to set-burn-status
 end
 
 to update-water-table
-   ask patches[
     ifelse item (ticks - 1) raindays-data = 1
     [
-      set water-table water-table - item (ticks - 1) rainfall-data
+      ask patches
+      [
+        set water-table water-table - item (ticks - 1) rainfall-data
+        check-wtd-range
+        set-ind
+        set-update-vulnerability
+      ]
       set count-dry-days 0
     ]
     [
-      set water-table water-table + evap-rate ;also condition for dry-days++
+      ask patches
+      [
+        set water-table water-table + evap-rate ;also condition for dry-days++
+        check-wtd-range
+        set-ind
+        set-update-vulnerability
+      ]
       set count-dry-days count-dry-days + 1
     ]
 
-    check-wtd-range
-    set-ind
-    set-update-vulnerability
-  ]
+
 end
 
 to check-wtd-range
@@ -523,7 +530,7 @@ frm
 frm
 0
 100
-0.0
+50.0
 1
 1
 NIL
@@ -569,7 +576,7 @@ dth
 dth
 0
 0.9
-0.0
+0.45
 0.01
 1
 NIL
@@ -584,7 +591,7 @@ dst
 dst
 5
 25
-0.0
+15.0
 1
 1
 NIL
@@ -599,7 +606,7 @@ igp
 igp
 0.1
 1
-0.0
+0.55
 0.1
 1
 NIL
@@ -614,7 +621,7 @@ evp
 evp
 0.003
 0.005
-0.0
+0.004
 0.0002
 1
 NIL
@@ -647,7 +654,7 @@ dbi
 dbi
 0
 35
-0.0
+18.0
 1
 1
 NIL
@@ -676,45 +683,30 @@ sum [power] of households
 11
 
 SLIDER
-9
-354
-160
-387
-wtd
-wtd
-0
-1
-0.0
-0.05
-1
-NIL
-HORIZONTAL
-
-SLIDER
-8
-394
-160
-427
+11
+355
+163
+388
 frp
 frp
 1
 5
-0.0
+3.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-8
-433
-160
-466
+11
+394
+163
+427
 bia
 bia
 0
 1
-0.0
+0.5
 0.1
 1
 NIL
@@ -799,7 +791,7 @@ ind
 ind
 0
 0.2
-0.0
+0.1
 0.01
 1
 NIL
@@ -821,15 +813,15 @@ NIL
 HORIZONTAL
 
 SLIDER
-9
-471
-160
-504
+12
+432
+163
+465
 bib
 bib
 0
 1
-0.0
+0.5
 .1
 1
 NIL
@@ -844,7 +836,7 @@ psb
 psb
 0.1
 1
-0.0
+0.5
 0.1
 1
 NIL
