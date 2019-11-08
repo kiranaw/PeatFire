@@ -40,25 +40,29 @@ to setup
   set-burn-status
   set-selection-index
   set-households
+  set-update-vulnerability
   set-rainfall
   set-lists
   reset-ticks
 end
 
 to go
-  if ticks > simulation-time [stop]
+  if ticks = simulation-time [stop]
   repeat simulation-time
   [
+    reset-total-fires
     tick
     search-and-ignite
-    reset-total-fires ;calculation purpose
     fire-process
     fire-spread
-
+    count-fires
     update-water-table
-    show count-dry-days
+    update-raindays
+    set-update-vulnerability
+    sum-dry-days
+    save-fires-ticks
   ]
-  ;print idrun ;for id in nlrx
+  print idrun
 end
 
 to set-households
@@ -70,6 +74,25 @@ to set-households
         make-households
     ]]
   ]
+  if farmers-dist = "clumped"
+  [
+    repeat frm[
+      ask one-of patches with [any? households-here = false and in-reserve? = false and ((pxcor < 10 and pycor < 10))]
+      [
+        make-households
+    ]
+    ]
+  ]
+  if farmers-dist = "regular"
+  [
+    repeat 50[
+      ask one-of patches with [any? households-here = false and in-reserve? = false and (pycor mod 20 = 10)
+          and ((pxcor - 5) mod 10 = 0)]
+      [
+        make-households
+    ]
+    ]
+  ]
 end
 
 to make-households
@@ -80,6 +103,7 @@ to make-households
           set power round(random-normal-in-bounds frp 1 0 4)
           set xcor [pxcor] of myself
           set ycor [pycor] of myself
+          ;hide-turtle
         ]
 end
 
@@ -102,41 +126,37 @@ to set-burn-status
 end
 
 to update-water-table
-    ifelse item (ticks - 1) raindays-data = 1
-    [
-      ask patches
-      [
-        set water-table water-table - item (ticks - 1) rainfall-data
-        check-wtd-range
-        set-ind
-        set-update-vulnerability
-      ]
-      set count-dry-days 0
+   ask patches[
+    ifelse item (ticks - 1) raindays-data = 1 [
+      set water-table water-table - item (ticks - 1) rainfall-data
     ]
     [
-      ask patches
-      [
-        set water-table water-table + evap-rate ;also condition for dry-days++
-        check-wtd-range
-        set-ind
-        set-update-vulnerability
-      ]
-      set count-dry-days count-dry-days + 1
+      set water-table water-table + evap-rate
     ]
-
-
-end
-
-to check-wtd-range
-  ;set bounds for water-table range (i.e -0.5 to 1)
     if water-table < -0.5
     [
       set water-table -0.5
     ]
     if (water-table > 1)
     [
-      set water-table 1
+       set water-table 1
     ]
+    set-ind
+  ]
+end
+
+to sum-dry-days
+  ifelse ( item (ticks - 1) raindays-data = -1)
+  [
+    set count-dry-days count-dry-days + 1
+  ]
+  [
+    set count-dry-days 0
+  ]
+end
+
+to update-raindays
+  set rain-days item (ticks - 1) rainfall-data + rain-days
 end
 
 to set-selection-index
@@ -146,21 +166,22 @@ to set-selection-index
 end
 
 to set-update-vulnerability
-  ;set the vulnerability here (update vulnerability)
-  if water-table >= 1 - dth ;dry
+  ask patches
   [
-    set vulnerability 1
-  ]
-  if water-table < 1 - dth ;wet
-  [
-    set vulnerability 0
+    if water-table >= 1 - dth ;dry
+    [
+      set vulnerability 1
+    ]
+    if water-table < 1 - dth ;wet
+    [
+      set vulnerability 0
+    ]
   ]
 end
 
 to fire-process
   ask patches
   [
-    ;above-ground fire
     if any? fires-here and burnt? = FALSE
     [
       set left-biomass left-biomass - bbr
@@ -170,15 +191,7 @@ to fire-process
         set burnval 1
         set burnt-patches burnt-patches + 1
       ]
-
-      if (burnt? = TRUE or inundated? = true)
-      [
-        terminate-above-fire
-        set burning? false
-      ]
     ]
-
-    ;below-ground fire
     if any? below-fires-here
     [
       set left-biomass-below left-biomass-below - bbr
@@ -187,51 +200,80 @@ to fire-process
         terminate-below-fire
       ]
     ]
-
-
+    if (burnt? = TRUE or inundated? = true) and any? fires-here
+    [
+      terminate-above-fire
+      set burning? false
+    ]
   ]
 end
 
 to fire-spread
-  ;above-ground fire spreading
   ask patches with [any? fires-here]
   [
-    ;vertical spreading
     if not any? below-fires-here and vulnerability = 1 and left-biomass-below > 0
     [
       ignite-below
     ]
-
-    ;horizontal spreading
-    ask neighbors
+    if spread-above? = true
     [
-      set fire-to-patch towards myself
-      let prob calculate-probability wind-direction-degree fire-to-patch
-      if prob = 0 [set prob 0.01]
-      set probability prob * wsp
-      if random-float 1 < probability and not any? fires-here and left-biomass > 0 and inundated? = false
+      ifelse spread-to-eight? = true
       [
-        spread-above
+        ask neighbors
+        [
+          set fire-to-patch towards myself
+          let prob calculate-probability wind-direction-degree fire-to-patch
+          if prob = 0 [set prob 0.01]
+          set probability prob * wsp
+          if random-float 1 < probability and not any? fires-here and left-biomass > 0 and inundated? = false
+          [
+            spread-above
+          ]
+        ]
+      ]
+      [
+        ask neighbors4
+        [
+          set fire-to-patch towards myself
+          let prob calculate-probability wind-direction-degree fire-to-patch
+          if prob = 0 [set prob 0.01]
+          set probability prob * wsp
+          if random-float 1 < probability and not any? fires-here and left-biomass > 0 and inundated? = false
+          [
+            spread-above
+          ]
+        ]
       ]
     ]
   ]
-
-  ;below-ground fire spreading
   ask patches with [any? below-fires-here]
   [
-    ;vertical spreading
     if left-biomass > 0 and not any? fires-here
     [
       ignite-above-from-below
     ]
-    ;horizontal spreading
-    if random-float 1 < psb ;and spread-below? = true
+    ifelse spread-to-eight? = true
     [
-      ask neighbors
+      if random-float 1 < psb and spread-below? = true
       [
-        if vulnerability = 1 and left-biomass-below > 0 and not any? below-fires-here
+        ask neighbors
         [
-          spread-below
+          if vulnerability = 1 and left-biomass-below > 0 and not any? below-fires-here
+          [
+            spread-below
+          ]
+        ]
+      ]
+    ]
+    [
+      if random-float 1 < psb and spread-below? = true
+      [
+        ask neighbors4
+        [
+          if vulnerability = 1 and left-biomass-below > 0 and not any? below-fires-here
+          [
+            spread-below
+          ]
         ]
       ]
     ]
@@ -256,11 +298,16 @@ end
 to terminate-below-fire
   ask below-fires-here
   [
+     ;set pcolor black
      die
   ]
 end
 
 to set-rainfall
+  ask patches [set rain-days 0]
+
+  ifelse random-rainfall? = FALSE
+  [
     set rainfall-data []
     file-open rainfall
     while [not file-at-end?] [set rainfall-data lput file-read rainfall-data]
@@ -270,6 +317,37 @@ to set-rainfall
     file-open raindays
     while [not file-at-end?] [set raindays-data lput file-read raindays-data]
     file-close
+  ]
+  [
+    set rainfall-data []
+    set raindays-data []
+    let r 0
+
+    file-open "rainfall15y.csv"
+    let result csv:from-row file-read-line
+    while [ not file-at-end? ] [
+      let row (csv:from-row file-read-line ";")
+      let avg item 0 row
+      let std item 1 row
+      let maks item 2 row
+      let alpha 0
+      let lambda 0
+      if rain-distribution = "normal"
+      [set r precision random-normal-in-bounds avg std 0 maks 3]
+      if rain-distribution = "gamma" and std > 0 and avg > 0
+      [
+        set lambda 0
+        set alpha (avg * avg) / (std ^ 2)
+        set lambda 1 / ((std ^ 2) / avg)
+        set r precision random-gamma-in-bounds alpha lambda 0 maks 3
+      ]
+      set rainfall-data lput r rainfall-data
+      ifelse r > 0
+      [set raindays-data lput 1 raindays-data]
+      [set raindays-data lput -1 raindays-data]
+    ]
+    file-close
+  ]
 end
 
 to search-land
@@ -365,11 +443,19 @@ to spread-below
 end
 
 to set-wtd
-  setup-function moisture-map
-  set-wtd-moisture-map
+  ifelse random-wtd? = TRUE
+  [
+    ask patches
+    [
+      set water-table random-normal-in-bounds wtd 0.1 -0.5 1
+    ]
+  ]
+  [
+    setup-function moisture-map
+    set-wtd-moisture-map
+  ]
   ask patches
   [
-    set-update-vulnerability
     set pcolor round (53 + (water-table))
     set-ind
     set in-reserve? false
@@ -443,6 +529,7 @@ to read-map-attributes[m]
   set yll read-from-string remove "YLLCORNER" file-read-line
   set cell-size read-from-string remove "CELLSIZE"file-read-line
   file-close
+  ;resize-map
 end
 
 to read-input-maps[m]
@@ -511,7 +598,7 @@ BUTTON
 59
 NIL
 go
-NIL
+T
 1
 T
 OBSERVER
@@ -530,7 +617,7 @@ frm
 frm
 0
 100
-50.0
+52.0
 1
 1
 NIL
@@ -574,9 +661,9 @@ SLIDER
 150
 dth
 dth
-0
-0.9
-0.45
+0.1
+1
+0.57
 0.01
 1
 NIL
@@ -654,7 +741,7 @@ dbi
 dbi
 0
 35
-18.0
+17.0
 1
 1
 NIL
@@ -683,10 +770,25 @@ sum [power] of households
 11
 
 SLIDER
-11
-355
-163
-388
+9
+354
+160
+387
+wtd
+wtd
+0
+1
+0.5
+0.05
+1
+NIL
+HORIZONTAL
+
+SLIDER
+8
+394
+160
+427
 frp
 frp
 1
@@ -698,10 +800,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-11
-394
-163
-427
+8
+433
+160
+466
 bia
 bia
 0
@@ -791,11 +893,22 @@ ind
 ind
 0
 0.2
-0.1
+0.0
 0.01
 1
 NIL
 HORIZONTAL
+
+SWITCH
+446
+432
+569
+465
+spread-above?
+spread-above?
+0
+1
+-1000
 
 SLIDER
 177
@@ -813,10 +926,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-12
-432
-163
-465
+9
+471
+160
+504
 bib
 bib
 0
@@ -836,11 +949,33 @@ psb
 psb
 0.1
 1
-0.5
+0.55
 0.1
 1
 NIL
 HORIZONTAL
+
+SWITCH
+13
+518
+145
+551
+spread-to-eight?
+spread-to-eight?
+0
+1
+-1000
+
+SWITCH
+446
+472
+569
+505
+spread-below?
+spread-below?
+0
+1
+-1000
 
 MONITOR
 720
@@ -852,6 +987,27 @@ sum-tf
 17
 1
 11
+
+SWITCH
+165
+516
+309
+549
+random-rainfall?
+random-rainfall?
+1
+1
+-1000
+
+CHOOSER
+316
+517
+428
+562
+rain-distribution
+rain-distribution
+"normal" "gamma"
+1
 
 PLOT
 903
@@ -893,6 +1049,17 @@ count patches - burnt-patches
 1
 11
 
+SWITCH
+445
+517
+573
+550
+random-wtd?
+random-wtd?
+1
+1
+-1000
+
 CHOOSER
 813
 489
@@ -920,7 +1087,17 @@ CHOOSER
 532
 simulation-time
 simulation-time
-365
+365 183
+0
+
+CHOOSER
+1066
+428
+1178
+473
+rainfall
+rainfall
+"rainfall.txt" "rainfall183.txt"
 0
 
 CHOOSER
@@ -930,29 +1107,19 @@ CHOOSER
 533
 raindays
 raindays
-"raindays.txt"
+"raindays.txt" "raindays183.txt"
 0
 
 INPUTBOX
-1333
-211
-1440
-271
+1231
+52
+1458
+112
 idrun
 0
 1
 0
 String
-
-CHOOSER
-1066
-428
-1178
-473
-rainfall
-rainfall
-"rainfall.txt"
-0
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -1303,7 +1470,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.4
+NetLogo 6.1.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
