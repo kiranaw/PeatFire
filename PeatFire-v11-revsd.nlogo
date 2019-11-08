@@ -332,7 +332,7 @@ end
 
 to check-ignite
   ask patch-here [
-      if left-biomass-above > 0 and count-dry-days >= ddb and random-float 1 < igp and inundated? = false;and vulnerability = 1
+      if left-biomass-above > 0 and count-dry-days >= ddb and random-float 1 < igp and inundated? = false
       [
         ignite-above
       ]
@@ -493,7 +493,7 @@ to set-wtd-biomass-map
 end
 
 to set-ind
-  ifelse water-table < ind
+  ifelse water-table < 0 - ind ;please explain what does this mean, then repeat again the experiment!
     [ set inundated? true ]
     [ set inundated? false ]
 end
@@ -793,7 +793,7 @@ wtd
 wtd
 0
 1
-0.75
+0.5
 0.05
 1
 NIL
@@ -907,8 +907,8 @@ SLIDER
 ind
 ind
 0
-0.2
-0.1
+0.5
+0.25
 0.01
 1
 NIL
