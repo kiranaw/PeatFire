@@ -16,19 +16,21 @@ patches-own[
   water-table
   vulnerability
   burning? ; if TRUE = fire has been ignited and patch is burning
-  biomass
-  left-biomass
+  ;biomass
+  left-biomass-above
   left-biomass-below
   evap-rate
   direction
   probability
   inundated?
   fire-to-patch
-  in-reserve?
+ ; in-reserve?
   p-spread-below
   burnt? ; if TRUE = all biomass burnt out
   burnval
   map-value
+  biomass-above
+  biomass-below
 ]
 
 to setup
@@ -68,16 +70,16 @@ end
 to set-households
   if farmers-dist = "random"
   [
-    repeat frm[
-      ask one-of patches with [any? households-here = false and in-reserve? = false]
+    repeat nof[
+      ask one-of patches with [any? households-here = false]
       [
         make-households
     ]]
   ]
   if farmers-dist = "clumped"
   [
-    repeat frm[
-      ask one-of patches with [any? households-here = false and in-reserve? = false and ((pxcor < 10 and pycor < 10))]
+    repeat nof[
+      ask one-of patches with [any? households-here = false and ((pxcor < 10 and pycor < 10))]
       [
         make-households
     ]
@@ -86,7 +88,7 @@ to set-households
   if farmers-dist = "regular"
   [
     repeat 50[
-      ask one-of patches with [any? households-here = false and in-reserve? = false and (pycor mod 20 = 10)
+      ask one-of patches with [any? households-here = false and (pycor mod 20 = 10)
           and ((pxcor - 5) mod 10 = 0)]
       [
         make-households
@@ -168,11 +170,11 @@ end
 to set-update-vulnerability
   ask patches
   [
-    if water-table >= 1 - dth ;dry
+    if water-table >= 1 - pdi ;dry
     [
       set vulnerability 1
     ]
-    if water-table < 1 - dth ;wet
+    if water-table < 1 - pdi ;wet
     [
       set vulnerability 0
     ]
@@ -184,8 +186,8 @@ to fire-process
   [
     if any? fires-here and burnt? = FALSE
     [
-      set left-biomass left-biomass - bbr
-      if left-biomass <= 0
+      set left-biomass-above left-biomass-above - bbr
+      if left-biomass-above <= 0
       [
         set burnt? TRUE
         set burnval 1
@@ -225,7 +227,7 @@ to fire-spread
           let prob calculate-probability wind-direction-degree fire-to-patch
           if prob = 0 [set prob 0.01]
           set probability prob * wsp
-          if random-float 1 < probability and not any? fires-here and left-biomass > 0 and inundated? = false
+          if random-float 1 < probability and not any? fires-here and left-biomass-above > 0 and inundated? = false
           [
             spread-above
           ]
@@ -238,7 +240,7 @@ to fire-spread
           let prob calculate-probability wind-direction-degree fire-to-patch
           if prob = 0 [set prob 0.01]
           set probability prob * wsp
-          if random-float 1 < probability and not any? fires-here and left-biomass > 0 and inundated? = false
+          if random-float 1 < probability and not any? fires-here and left-biomass-above > 0 and inundated? = false
           [
             spread-above
           ]
@@ -248,7 +250,7 @@ to fire-spread
   ]
   ask patches with [any? below-fires-here]
   [
-    if left-biomass > 0 and not any? fires-here
+    if left-biomass-above > 0 and not any? fires-here
     [
       ignite-above-from-below
     ]
@@ -306,9 +308,7 @@ end
 to set-rainfall
   ask patches [set rain-days 0]
 
-  ifelse random-rainfall? = FALSE
-  [
-    set rainfall-data []
+  set rainfall-data []
     file-open rainfall
     while [not file-at-end?] [set rainfall-data lput file-read rainfall-data]
     file-close
@@ -317,37 +317,7 @@ to set-rainfall
     file-open raindays
     while [not file-at-end?] [set raindays-data lput file-read raindays-data]
     file-close
-  ]
-  [
-    set rainfall-data []
-    set raindays-data []
-    let r 0
 
-    file-open "rainfall15y.csv"
-    let result csv:from-row file-read-line
-    while [ not file-at-end? ] [
-      let row (csv:from-row file-read-line ";")
-      let avg item 0 row
-      let std item 1 row
-      let maks item 2 row
-      let alpha 0
-      let lambda 0
-      if rain-distribution = "normal"
-      [set r precision random-normal-in-bounds avg std 0 maks 3]
-      if rain-distribution = "gamma" and std > 0 and avg > 0
-      [
-        set lambda 0
-        set alpha (avg * avg) / (std ^ 2)
-        set lambda 1 / ((std ^ 2) / avg)
-        set r precision random-gamma-in-bounds alpha lambda 0 maks 3
-      ]
-      set rainfall-data lput r rainfall-data
-      ifelse r > 0
-      [set raindays-data lput 1 raindays-data]
-      [set raindays-data lput -1 raindays-data]
-    ]
-    file-close
-  ]
 end
 
 to search-land
@@ -362,7 +332,7 @@ end
 
 to check-ignite
   ask patch-here [
-      if biomass > 0 and count-dry-days >= dbi and random-float 1 < igp and inundated? = false;and vulnerability = 1
+      if left-biomass-above > 0 and count-dry-days >= ddb and random-float 1 < igp and inundated? = false;and vulnerability = 1
       [
         ignite-above
       ]
@@ -448,18 +418,19 @@ to set-wtd
     ask patches
     [
       set water-table random-normal-in-bounds wtd 0.1 -0.5 1
+      set-ind
     ]
   ]
   [
     setup-function moisture-map
-    set-wtd-moisture-map
+    set-wtd-moisture-map-2
   ]
-  ask patches
-  [
-    set pcolor round (53 + (water-table))
-    set-ind
-    set in-reserve? false
-  ]
+;  ask patches
+;  [
+;    set pcolor round (53 + (water-table))
+;    set-ind
+;    set in-reserve? false
+;  ]
 end
 
 to set-wtd-moisture-map ;-0.5 to 1
@@ -488,6 +459,39 @@ to set-wtd-moisture-map ;-0.5 to 1
   ]
 end
 
+to set-wtd-moisture-map-2 ;-0.5 to 1
+  ask patches
+  [
+    if map-value = 1 [set water-table 1.000 - random-float 0.075]
+    if map-value = 2 [set water-table 0.926 - random-float 0.075]
+    if map-value = 3 [set water-table 0.851 - random-float 0.075]
+    if map-value = 4 [set water-table 0.776 - random-float 0.075]
+    if map-value = 5 [set water-table 0.701 - random-float 0.075]
+    if map-value = 6 [set water-table 0.626 - random-float 0.075]
+    if map-value = 7 [set water-table 0.551 - random-float 0.075]
+    if map-value = 8 [set water-table 0.476 - random-float 0.075]
+    if map-value = 9 [set water-table 0.401 - random-float 0.075]
+    if map-value = 10 [set water-table 0.326 - random-float 0.075]
+    if map-value = 11 [set water-table 0.251 - random-float 0.075]
+    if map-value = 12 [set water-table 0.176 - random-float 0.075]
+    if map-value = 13 [set water-table 0.101 - random-float 0.075]
+    if map-value = 14 [set water-table 0.026 - random-float 0.075]
+    if map-value = 15 [set water-table -0.051 - random-float 0.075]
+    if map-value = 16 [set water-table -0.126 - random-float 0.075]
+    if map-value = 17 [set water-table -0.201 - random-float 0.075]
+    if map-value = 18 [set water-table -0.276 - random-float 0.075]
+    if map-value = 19 [set water-table -0.351 - random-float 0.075]
+    if map-value = 20 [set water-table -0.426 - random-float 0.075]
+  ]
+end
+
+to set-wtd-biomass-map
+  ask patches
+  [
+    set biomass-above ((map-value - 1) / 15) + random-float (1 / 15)
+  ]
+end
+
 to set-ind
   ifelse water-table < ind
     [ set inundated? true ]
@@ -495,23 +499,34 @@ to set-ind
 end
 
 to set-biomass
+  ifelse random-biomass? = true
+  [
+    ask patches
+    [
+      set biomass-above precision (random-normal-in-bounds bia 1 0 1) 1
+    ]
+  ]
+  [
+    setup-function biomass-map
+    set-wtd-biomass-map
+  ]
   ask patches
   [
-    set biomass precision (random-normal-in-bounds bia 1 0 1) 1
-    set left-biomass biomass * 10
+    set left-biomass-above biomass-above * 10
+    set pcolor round (53 + (biomass-above))
   ]
 end
 
 to set-biomass-below
   ask patches
   [
-    set biomass precision (random-normal-in-bounds bib 1 0 1) 1
-    set left-biomass-below biomass * 10
+    set biomass-below precision (random-normal-in-bounds bib 1 0 1) 1
+    set left-biomass-below biomass-below * 10
   ]
 end
 
 to set-evap-rate
-  ask patches [set evap-rate evp * biomass]
+  ask patches [set evap-rate evp * biomass-above]
 end
 
 to setup-function [m]
@@ -613,11 +628,11 @@ SLIDER
 79
 167
 112
-frm
-frm
+nof
+nof
 0
 100
-52.0
+50.0
 1
 1
 NIL
@@ -659,11 +674,11 @@ SLIDER
 117
 166
 150
-dth
-dth
+pdi
+pdi
 0.1
 1
-0.57
+0.55
 0.01
 1
 NIL
@@ -737,11 +752,11 @@ SLIDER
 277
 162
 310
-dbi
-dbi
+ddb
+ddb
 0
 35
-17.0
+18.0
 1
 1
 NIL
@@ -778,7 +793,7 @@ wtd
 wtd
 0
 1
-0.5
+0.75
 0.05
 1
 NIL
@@ -893,7 +908,7 @@ ind
 ind
 0
 0.2
-0.0
+0.1
 0.01
 1
 NIL
@@ -935,7 +950,7 @@ bib
 0
 1
 0.5
-.1
+0.1
 1
 NIL
 HORIZONTAL
@@ -988,27 +1003,6 @@ sum-tf
 1
 11
 
-SWITCH
-165
-516
-309
-549
-random-rainfall?
-random-rainfall?
-1
-1
--1000
-
-CHOOSER
-316
-517
-428
-562
-rain-distribution
-rain-distribution
-"normal" "gamma"
-1
-
 PLOT
 903
 226
@@ -1056,7 +1050,7 @@ SWITCH
 550
 random-wtd?
 random-wtd?
-1
+0
 1
 -1000
 
@@ -1120,6 +1114,45 @@ idrun
 1
 0
 String
+
+CHOOSER
+812
+541
+950
+586
+biomass-map
+biomass-map
+"biomass.asc"
+0
+
+PLOT
+1242
+147
+1442
+297
+distribution-of-biomass
+NIL
+NIL
+0.0
+1.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 0.1 1 -16777216 true "histogram [biomass-above] of patches" "histogram [biomass-above] of patches"
+
+SWITCH
+304
+516
+437
+549
+random-biomass?
+random-biomass?
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
