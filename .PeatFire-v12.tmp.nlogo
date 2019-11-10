@@ -332,7 +332,7 @@ end
 
 to check-ignite
   ask patch-here [
-      if left-biomass-above > 0 and count-dry-days >= ddb and inundated? = false
+      if left-biomass-above > 0 and count-dry-days >= ddb  and inundated? = false
       [
         ignite-above
       ]
@@ -700,10 +700,25 @@ NIL
 HORIZONTAL
 
 SLIDER
-9
-192
-164
-225
+12
+189
+167
+222
+igp
+igp
+0.1
+1
+1.0
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+10
+230
+165
+263
 evp
 evp
 0.003
@@ -733,10 +748,10 @@ PENS
 "water-level" 1.0 0 -13345367 true "" "plot mean [water-table] of patches"
 
 SLIDER
-9
-232
-163
-265
+10
+270
+164
+303
 ddb
 ddb
 0
@@ -770,10 +785,10 @@ sum [power] of households
 11
 
 SLIDER
-11
-309
-162
-342
+12
+347
+163
+380
 wtd
 wtd
 -0.5
@@ -785,10 +800,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-9
-349
-161
-382
+10
+387
+162
+420
 frp
 frp
 1
@@ -818,10 +833,10 @@ PENS
 "default" 0.1 1 -16777216 true "histogram [water-table] of patches" "histogram [water-table] of patches"
 
 SLIDER
-11
-271
-162
-304
+12
+309
+163
+342
 bbr
 bbr
 0.1
@@ -911,10 +926,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-11
-426
-162
-459
+12
+464
+163
+497
 bib
 bib
 0
@@ -941,10 +956,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-10
-469
-142
-502
+13
+518
+145
+551
 spread-to-eight?
 spread-to-eight?
 0
@@ -1125,10 +1140,10 @@ random-biomass?
 -1000
 
 SLIDER
-9
-388
-161
-421
+10
+426
+162
+459
 bia
 bia
 0
